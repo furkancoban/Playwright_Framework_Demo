@@ -10,6 +10,7 @@
 - [Quick Start](#quick-start)
 - [Project Structure](#project-structure)
 - [Running Tests](#running-tests)
+- [CI/CD with CircleCI](#cicd-with-circleci)
 - [Configuration](#configuration)
 - [Writing Tests](#writing-tests)
 - [Reports & Logs](#reports--logs)
@@ -147,6 +148,45 @@ mvn "-Dtest.browser=chrome" test
 # Clean previous reports and build fresh
 mvn clean test
 ```
+
+## CI/CD with CircleCI
+
+This repository includes CircleCI config at [.circleci/config.yml](.circleci/config.yml).
+
+### What it does
+
+- Triggers on every push/commit to the repository
+- Runs tests in **parallel (4 shards)** for faster feedback
+- Uses Maven cache to speed up dependency resolution
+- Runs browser tests in `headless` mode on CI
+
+### Enforce "no failing code in repo"
+
+To make sure failed tests block repository updates, enable **branch protection** on GitHub:
+
+1. GitHub → `Settings` → `Branches` → `Add rule`
+2. Branch pattern: `main`
+3. Enable:
+   - `Require a pull request before merging`
+   - `Require status checks to pass before merging`
+4. Select the CircleCI check for this workflow/job
+5. (Optional) Enable `Require branches to be up to date before merging`
+
+This prevents merging to `main` when CircleCI tests fail.
+
+### Optional local gate before push
+
+A local pre-push hook is included at [.githooks/pre-push](.githooks/pre-push).
+
+Enable it once per clone:
+
+```bash
+git config core.hooksPath .githooks
+```
+
+After enabling, every `git push` runs smoke tests first and blocks the push on failure.
+
+(Committing locally can’t be centrally blocked by CI; branch protection blocks merge/push to protected branches.)
 
 ## Configuration
 

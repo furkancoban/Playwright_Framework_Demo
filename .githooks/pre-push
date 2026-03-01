@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+set -e
+
+echo "[pre-push] Running smoke tests before push..."
+mvn -B -Dtest.browser=chromium -Dtest.headless=true -Dcucumber.filter.tags=@smoke test
+
+echo "[pre-push] Tests passed. Continuing push."
