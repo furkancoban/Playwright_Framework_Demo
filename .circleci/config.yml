@@ -5,7 +5,7 @@ jobs:
     docker:
       # Includes Java + Playwright browsers pre-installed for faster startup.
       - image: mcr.microsoft.com/playwright/java:v1.40.0-jammy
-    parallelism: 4
+    parallelism: 3
     environment:
       MAVEN_OPTS: -Xmx2048m
     steps:
@@ -31,8 +31,7 @@ jobs:
             case "$CIRCLE_NODE_INDEX" in
               0) TAG_EXPR='@test1 or @test2 or @test3 or @test4 or @test5' ;;
               1) TAG_EXPR='@test6 or @test7 or @test8 or @test9 or @test10' ;;
-              2) TAG_EXPR='@test11 or @test12 or @test13 or @test14 or @test15' ;;
-              3) TAG_EXPR='@test16 or @test17 or @test18 or @test19 or @test20' ;;
+              2) TAG_EXPR='@test16 or @test17 or @test18 or @test19 or @test21' ;;
               *) TAG_EXPR='@smoke' ;;
             esac
             echo "export TAG_EXPR=\"$TAG_EXPR\"" >> "$BASH_ENV"

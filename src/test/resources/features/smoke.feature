@@ -106,7 +106,7 @@ Feature: Smoke Test Suite - OrangeHRM Critical Functionality
   # These 10 API tests verify the REST API endpoints are working
   # They complement the UI tests above for complete coverage
 
-  @smoke @api @test11 @api_health
+  @api @test11 @api_health
   Scenario: Test 11 - API Health Check
     Given the API base URL is configured
     Then the API should be accessible
@@ -114,7 +114,7 @@ Feature: Smoke Test Suite - OrangeHRM Critical Functionality
     Then the API response status code should be 200
     And the API response time should be less than 5000 milliseconds
 
-  @smoke @api @test12 @api_auth
+  @api @test12 @api_auth
   Scenario: Test 12 - API Authentication Endpoint
     Given the API base URL is configured
     When I send a POST request to "/auth/login" with body:
@@ -128,7 +128,7 @@ Feature: Smoke Test Suite - OrangeHRM Critical Functionality
     And the API response should be valid JSON
     And the API response time should be less than 3000 milliseconds
 
-  @smoke @api @test13 @api_employees_list
+  @api @test13 @api_employees_list
   Scenario: Test 13 - Get Employee List
     Given the API base URL is configured
     When I add API header "Authorization" with value "Bearer test-token"
@@ -136,7 +136,7 @@ Feature: Smoke Test Suite - OrangeHRM Critical Functionality
     Then the API response should be valid JSON
     And the API response time should be less than 5000 milliseconds
 
-  @smoke @api @test14 @api_employee_details
+  @api @test14 @api_employee_details
   Scenario: Test 14 - Get Single Employee Details
     Given the API base URL is configured
     When I add API header "Authorization" with value "Bearer test-token"
@@ -144,7 +144,7 @@ Feature: Smoke Test Suite - OrangeHRM Critical Functionality
     Then the API response should be valid JSON
     And the API response time should be less than 3000 milliseconds
 
-  @smoke @api @test15 @api_create_employee
+  @api @test15 @api_create_employee
   Scenario: Test 15 - Create New Employee
     Given the API base URL is configured
     When I add API header "Authorization" with value "Bearer test-token"
@@ -207,7 +207,7 @@ Feature: Smoke Test Suite - OrangeHRM Critical Functionality
     Then the API response should be valid JSON
     And the API response time should be less than 3000 milliseconds
 
-  @smoke @api @test20 @api_time_records
+  @api @test20 @api_time_records
   Scenario: Test 20 - Get Time Records
     Given the API base URL is configured
     When I add API header "Authorization" with value "Bearer test-token"
