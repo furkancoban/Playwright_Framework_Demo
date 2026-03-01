@@ -330,7 +330,6 @@ Feature: Comprehensive regression tests for OrangeHRM
         When I logout
         Then I should be on the login page
         And the login page should display properly
-    And I should see at least 8 menu items
-    Then the page title should contain "OrangeHRM"
+        And the page title should contain "OrangeHRM"
 
 
