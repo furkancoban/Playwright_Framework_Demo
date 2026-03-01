@@ -2,12 +2,15 @@ package com.example.orangehrm.steps;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import com.example.orangehrm.pages.LoginPage;
 import com.example.orangehrm.pages.DashboardPage;
 import com.example.orangehrm.context.TestContext;
 import com.example.orangehrm.utils.TestLogger;
 import com.example.orangehrm.utils.ScreenshotHelper;
 import com.example.orangehrm.assertions.UIAssertions;
+import com.example.orangehrm.api.APITester;
+import com.example.orangehrm.config.ConfigManager;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -27,6 +30,11 @@ public class StepDefinitions {
     private TestContext testContext;
     private LoginPage loginPage;
     private DashboardPage dashboardPage;
+    
+    // API Testing fields
+    private APITester apiTester;
+    private APITester.APIResponse lastApiResponse;
+    private String apiBaseUrl;
 
     public StepDefinitions() {
         this.testContext = Hooks.testContext;
@@ -34,6 +42,12 @@ public class StepDefinitions {
             this.loginPage = testContext.getLoginPage();
             this.dashboardPage = testContext.getDashboardPage();
         }
+        // Build API base URL from UI URL so UI/API tests stay aligned across environments.
+        // Example:
+        // https://.../web/index.php/auth/login -> https://.../web/index.php/api/v2
+        this.apiBaseUrl = ConfigManager.getAppUrl().replace("/web/index.php/auth/login", "/web/index.php/api/v2");
+        // Reuse one API client per scenario execution context.
+        this.apiTester = new APITester(apiBaseUrl);
     }
     
     /**
@@ -428,6 +442,138 @@ public class StepDefinitions {
         assertTrue(loginPage.isElementVisible("input[name='password']"), "Password field should be visible");
         assertTrue(loginPage.isElementVisible("button[type='submit']"), "Login button should be visible");
         TestLogger.assertion("Login page displays properly with all elements");
+    }
+    
+    // ==================== API TEST STEP DEFINITIONS ====================
+    
+    @Given("the API base URL is configured")
+    public void the_api_base_url_is_configured() {
+        TestLogger.testStep("Verify API base URL is configured");
+        assertNotNull(apiBaseUrl, "API base URL should be configured");
+        TestLogger.info("API Base URL: " + apiBaseUrl);
+    }
+    
+    @When("I send a GET request to {string}")
+    public void i_send_a_get_request_to(String endpoint) {
+        TestLogger.testStep("Send GET request to: " + endpoint);
+        // Store the latest response so follow-up Then-steps can assert on it.
+        lastApiResponse = apiTester.get(endpoint);
+        TestLogger.info("Response Status: " + lastApiResponse.getStatusCode());
+    }
+    
+    @When("I send a POST request to {string} with body:")
+    public void i_send_a_post_request_to_with_body(String endpoint, String requestBody) {
+        TestLogger.testStep("Send POST request to: " + endpoint);
+        // Request body comes from Cucumber doc-string in the feature file.
+        lastApiResponse = apiTester.post(endpoint, requestBody);
+        TestLogger.info("Response Status: " + lastApiResponse.getStatusCode());
+    }
+    
+    @When("I send a PUT request to {string} with body:")
+    public void i_send_a_put_request_to_with_body(String endpoint, String requestBody) {
+        TestLogger.testStep("Send PUT request to: " + endpoint);
+        lastApiResponse = apiTester.put(endpoint, requestBody);
+        TestLogger.info("Response Status: " + lastApiResponse.getStatusCode());
+    }
+    
+    @When("I send a DELETE request to {string}")
+    public void i_send_a_delete_request_to(String endpoint) {
+        TestLogger.testStep("Send DELETE request to: " + endpoint);
+        lastApiResponse = apiTester.delete(endpoint);
+        TestLogger.info("Response Status: " + lastApiResponse.getStatusCode());
+    }
+    
+    @Then("the API response status code should be {int}")
+    public void the_api_response_status_code_should_be(Integer expectedStatusCode) {
+        TestLogger.testStep("Verify API response status code is " + expectedStatusCode);
+        assertNotNull(lastApiResponse, "API response should not be null");
+        // Strict contract check on HTTP status.
+        assertEquals(expectedStatusCode.intValue(), lastApiResponse.getStatusCode(),
+                "Expected status code " + expectedStatusCode + " but got " + lastApiResponse.getStatusCode());
+        TestLogger.assertion("✓ API response status code is " + expectedStatusCode);
+    }
+    
+    @Then("the API response should contain {string}")
+    public void the_api_response_should_contain(String expectedContent) {
+        TestLogger.testStep("Verify API response contains: " + expectedContent);
+        assertNotNull(lastApiResponse, "API response should not be null");
+        String responseBody = lastApiResponse.getBody();
+        assertTrue(responseBody.contains(expectedContent),
+                "Response should contain '" + expectedContent + "' but was: " + responseBody);
+        TestLogger.assertion("✓ API response contains expected content");
+    }
+    
+    @Then("the API response time should be less than {int} milliseconds")
+    public void the_api_response_time_should_be_less_than_milliseconds(Integer maxResponseTime) {
+        TestLogger.testStep("Verify API response time is less than " + maxResponseTime + "ms");
+        assertNotNull(lastApiResponse, "API response should not be null");
+        long actualResponseTime = lastApiResponse.getResponseTime();
+        assertTrue(actualResponseTime < maxResponseTime,
+                "Response time should be less than " + maxResponseTime + "ms but was " + actualResponseTime + "ms");
+        TestLogger.assertion("✓ API response time: " + actualResponseTime + "ms");
+    }
+    
+    @Then("the API response should be valid JSON")
+    public void the_api_response_should_be_valid_json() {
+        TestLogger.testStep("Verify API response is valid JSON");
+        assertNotNull(lastApiResponse, "API response should not be null");
+        // Quick schema-agnostic sanity check: response must be parseable JSON.
+        assertTrue(lastApiResponse.isJson(), "Response should be valid JSON");
+        TestLogger.assertion("✓ API response is valid JSON");
+    }
+    
+    @Then("the API response should have field {string}")
+    public void the_api_response_should_have_field(String fieldName) {
+        TestLogger.testStep("Verify API response has field: " + fieldName);
+        assertNotNull(lastApiResponse, "API response should not be null");
+        assertTrue(lastApiResponse.hasField(fieldName),
+                "Response should have field '" + fieldName + "'");
+        TestLogger.assertion("✓ API response has field: " + fieldName);
+    }
+    
+    @Then("the API response field {string} should equal {string}")
+    public void the_api_response_field_should_equal(String fieldName, String expectedValue) {
+        TestLogger.testStep("Verify API response field '" + fieldName + "' equals '" + expectedValue + "'");
+        assertNotNull(lastApiResponse, "API response should not be null");
+        String actualValue = lastApiResponse.getFieldValue(fieldName);
+        assertEquals(expectedValue, actualValue,
+                "Field '" + fieldName + "' should equal '" + expectedValue + "' but was '" + actualValue + "'");
+        TestLogger.assertion("✓ API response field matches expected value");
+    }
+    
+    @When("I add API header {string} with value {string}")
+    public void i_add_api_header_with_value(String headerName, String headerValue) {
+        TestLogger.testStep("Add API header: " + headerName);
+        apiTester.addHeader(headerName, headerValue);
+        TestLogger.info("Header added: " + headerName + " = " + headerValue);
+    }
+    
+    @When("I set API bearer token {string}")
+    public void i_set_api_bearer_token(String token) {
+        TestLogger.testStep("Set API bearer token");
+        apiTester.setBearerToken(token);
+        TestLogger.info("Bearer token configured");
+    }
+    
+    @Then("the API response should be successful")
+    public void the_api_response_should_be_successful() {
+        TestLogger.testStep("Verify API response is successful");
+        assertNotNull(lastApiResponse, "API response should not be null");
+        assertTrue(lastApiResponse.isSuccess(),
+                "API response should be successful (2xx) but was " + lastApiResponse.getStatusCode());
+        TestLogger.assertion("✓ API response is successful");
+    }
+    
+    @Then("the API should be accessible")
+    public void the_api_should_be_accessible() {
+        TestLogger.testStep("Verify API is accessible");
+        // Try a simple base endpoint probe. We only fail hard on server errors (5xx).
+        // This keeps health checks tolerant of 2xx/3xx/4xx differences across environments.
+        APITester.APIResponse response = apiTester.get("/");
+        assertNotNull(response, "API should respond");
+        assertTrue(response.getStatusCode() < 500, 
+                "API should be accessible (status < 500), got: " + response.getStatusCode());
+        TestLogger.assertion("✓ API is accessible");
     }
 }
 

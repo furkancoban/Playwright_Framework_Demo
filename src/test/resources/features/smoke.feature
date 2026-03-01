@@ -101,3 +101,116 @@ Feature: Smoke Test Suite - OrangeHRM Critical Functionality
     When I logout
     Then I should be on the login page
     And the login page should display properly
+
+  # ==================== API SMOKE TESTS ====================
+  # These 10 API tests verify the REST API endpoints are working
+  # They complement the UI tests above for complete coverage
+
+  @smoke @api @test11 @api_health
+  Scenario: Test 11 - API Health Check
+    Given the API base URL is configured
+    Then the API should be accessible
+    When I send a GET request to "/"
+    Then the API response status code should be 200
+    And the API response time should be less than 5000 milliseconds
+
+  @smoke @api @test12 @api_auth
+  Scenario: Test 12 - API Authentication Endpoint
+    Given the API base URL is configured
+    When I send a POST request to "/auth/login" with body:
+      """
+      {
+        "username": "Admin",
+        "password": "admin123"
+      }
+      """
+    Then the API response should be successful
+    And the API response should be valid JSON
+    And the API response time should be less than 3000 milliseconds
+
+  @smoke @api @test13 @api_employees_list
+  Scenario: Test 13 - Get Employee List
+    Given the API base URL is configured
+    When I add API header "Authorization" with value "Bearer test-token"
+    And I send a GET request to "/pim/employees"
+    Then the API response should be valid JSON
+    And the API response time should be less than 5000 milliseconds
+
+  @smoke @api @test14 @api_employee_details
+  Scenario: Test 14 - Get Single Employee Details
+    Given the API base URL is configured
+    When I add API header "Authorization" with value "Bearer test-token"
+    And I send a GET request to "/pim/employees/1"
+    Then the API response should be valid JSON
+    And the API response time should be less than 3000 milliseconds
+
+  @smoke @api @test15 @api_create_employee
+  Scenario: Test 15 - Create New Employee
+    Given the API base URL is configured
+    When I add API header "Authorization" with value "Bearer test-token"
+    And I send a POST request to "/pim/employees" with body:
+      """
+      {
+        "firstName": "John",
+        "middleName": "Test",
+        "lastName": "Doe",
+        "employeeId": "EMP-API-001"
+      }
+      """
+    Then the API response should be valid JSON
+    And the API response time should be less than 5000 milliseconds
+
+  @smoke @api @test16 @api_update_employee
+  Scenario: Test 16 - Update Employee Information
+    Given the API base URL is configured
+    When I add API header "Authorization" with value "Bearer test-token"
+    And I send a PUT request to "/pim/employees/1" with body:
+      """
+      {
+        "firstName": "Jane",
+        "lastName": "Smith",
+        "employeeId": "EMP-API-002"
+      }
+      """
+    Then the API response should be valid JSON
+    And the API response time should be less than 3000 milliseconds
+
+  @smoke @api @test17 @api_leave_requests
+  Scenario: Test 17 - Get Leave Requests List
+    Given the API base URL is configured
+    When I add API header "Authorization" with value "Bearer test-token"
+    And I send a GET request to "/leave/leave-requests"
+    Then the API response should be valid JSON
+    And the API response time should be less than 5000 milliseconds
+
+  @smoke @api @test18 @api_create_leave
+  Scenario: Test 18 - Create Leave Request
+    Given the API base URL is configured
+    When I add API header "Authorization" with value "Bearer test-token"
+    And I send a POST request to "/leave/leave-requests" with body:
+      """
+      {
+        "leaveType": "Annual",
+        "fromDate": "2026-03-15",
+        "toDate": "2026-03-17",
+        "comment": "Family vacation"
+      }
+      """
+    Then the API response should be valid JSON
+    And the API response time should be less than 3000 milliseconds
+
+  @smoke @api @test19 @api_user_profile
+  Scenario: Test 19 - Get Current User Profile
+    Given the API base URL is configured
+    When I add API header "Authorization" with value "Bearer test-token"
+    And I send a GET request to "/admin/users/current"
+    Then the API response should be valid JSON
+    And the API response time should be less than 3000 milliseconds
+
+  @smoke @api @test20 @api_time_records
+  Scenario: Test 20 - Get Time Records
+    Given the API base URL is configured
+    When I add API header "Authorization" with value "Bearer test-token"
+    And I send a GET request to "/time/timesheets"
+    Then the API response should be valid JSON
+    And the API response time should be less than 5000 milliseconds

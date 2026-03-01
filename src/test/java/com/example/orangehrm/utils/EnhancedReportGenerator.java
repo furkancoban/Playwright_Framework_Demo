@@ -175,7 +175,7 @@ public class EnhancedReportGenerator {
                                     }
                                 }
                                 
-                                // Check for embedded screenshots
+                                // Check for embedded screenshots in step
                                 JsonNode embeddings = step.get("embeddings");
                                 if (embeddings != null && embeddings.isArray() && embeddings.size() > 0) {
                                     for (JsonNode embedding : embeddings) {
@@ -191,6 +191,35 @@ public class EnhancedReportGenerator {
                                                 testStep.screenshotBase64 = embedding.get("data").asText();
                                                 testStep.screenshotPath = "screenshot_" + scenario.steps.size();
                                                 break;  // Take first image
+                                            }
+                                        }
+                                    }
+                                }
+                                
+                                // Check for embeddings in "after" hooks (AfterStep screenshots)
+                                if (testStep.screenshotBase64 == null) {
+                                    JsonNode after = step.get("after");
+                                    if (after != null && after.isArray()) {
+                                        for (JsonNode hook : after) {
+                                            JsonNode hookEmbeddings = hook.get("embeddings");
+                                            if (hookEmbeddings != null && hookEmbeddings.isArray()) {
+                                                for (JsonNode embedding : hookEmbeddings) {
+                                                    String mimeType = "";
+                                                    if (embedding.has("mime_type")) {
+                                                        mimeType = embedding.get("mime_type").asText();
+                                                    } else if (embedding.has("media_type")) {
+                                                        mimeType = embedding.get("media_type").asText();
+                                                    }
+                                                    
+                                                    if (mimeType.contains("image")) {
+                                                        if (embedding.has("data")) {
+                                                            testStep.screenshotBase64 = embedding.get("data").asText();
+                                                            testStep.screenshotPath = "screenshot_" + scenario.steps.size();
+                                                            break;
+                                                        }
+                                                    }
+                                                }
+                                                if (testStep.screenshotBase64 != null) break;
                                             }
                                         }
                                     }
@@ -636,5 +665,20 @@ public class EnhancedReportGenerator {
     private static String capitalize(String str) {
         if (str == null || str.isEmpty()) return str;
         return str.substring(0, 1).toUpperCase() + str.substring(1);
+    }
+    
+    /**
+     * Main method to manually regenerate the report from existing cucumber.json
+     */
+    public static void main(String[] args) {
+        System.out.println("Manually regenerating enhanced test report...");
+        try {
+            generateEnhancedReport();
+            System.out.println("✓ Report regenerated successfully!");
+            System.out.println("Open target/enhanced-test-report.html to view");
+        } catch (Exception e) {
+            System.err.println("✗ Failed to regenerate report: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 }

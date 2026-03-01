@@ -28,6 +28,7 @@ public class APITester {
         this.httpClient = HttpClient.newHttpClient();
         this.objectMapper = new ObjectMapper();
         this.defaultHeaders = new HashMap<>();
+        // Sensible JSON defaults for most REST endpoints.
         this.defaultHeaders.put("Content-Type", "application/json");
         this.defaultHeaders.put("Accept", "application/json");
     }
@@ -63,10 +64,17 @@ public class APITester {
             defaultHeaders.forEach(requestBuilder::header);
             
             HttpRequest request = requestBuilder.build();
+            // Measure end-to-end request latency for performance assertions.
+            long startTime = System.currentTimeMillis();
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            long endTime = System.currentTimeMillis();
             
-            TestLogger.info("✓ GET " + endpoint + " : " + response.statusCode());
-            return new APIResponse(response);
+            // Wrap raw HTTP response in helper object used by step definitions.
+            APIResponse apiResponse = new APIResponse(response);
+            apiResponse.setResponseTime(endTime - startTime);
+            
+            TestLogger.info("✓ GET " + endpoint + " : " + response.statusCode() + " (" + (endTime - startTime) + "ms)");
+            return apiResponse;
         } catch (Exception e) {
             TestLogger.error("✗ GET request failed: " + endpoint, e);
             throw new RuntimeException("API GET request failed: " + endpoint, e);
@@ -86,9 +94,15 @@ public class APITester {
             defaultHeaders.forEach(requestBuilder::header);
             
             HttpRequest request = requestBuilder.build();
+            long startTime = System.currentTimeMillis();
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            TestLogger.info("✓ POST " + endpoint + " : " + response.statusCode());
-            return new APIResponse(response);
+            long endTime = System.currentTimeMillis();
+            
+            APIResponse apiResponse = new APIResponse(response);
+            apiResponse.setResponseTime(endTime - startTime);
+            
+            TestLogger.info("✓ POST " + endpoint + " : " + response.statusCode() + " (" + (endTime - startTime) + "ms)");
+            return apiResponse;
         } catch (Exception e) {
             TestLogger.error("✗ POST request failed: " + endpoint, e);
             throw new RuntimeException("API POST request failed: " + endpoint, e);
@@ -108,9 +122,15 @@ public class APITester {
             defaultHeaders.forEach(requestBuilder::header);
             
             HttpRequest request = requestBuilder.build();
+            long startTime = System.currentTimeMillis();
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            TestLogger.info("✓ PUT " + endpoint + " : " + response.statusCode());
-            return new APIResponse(response);
+            long endTime = System.currentTimeMillis();
+            
+            APIResponse apiResponse = new APIResponse(response);
+            apiResponse.setResponseTime(endTime - startTime);
+            
+            TestLogger.info("✓ PUT " + endpoint + " : " + response.statusCode() + " (" + (endTime - startTime) + "ms)");
+            return apiResponse;
         } catch (Exception e) {
             TestLogger.error("✗ PUT request failed: " + endpoint, e);
             throw new RuntimeException("API PUT request failed: " + endpoint, e);
@@ -130,9 +150,15 @@ public class APITester {
             defaultHeaders.forEach(requestBuilder::header);
             
             HttpRequest request = requestBuilder.build();
+            long startTime = System.currentTimeMillis();
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            TestLogger.info("✓ DELETE " + endpoint + " : " + response.statusCode());
-            return new APIResponse(response);
+            long endTime = System.currentTimeMillis();
+            
+            APIResponse apiResponse = new APIResponse(response);
+            apiResponse.setResponseTime(endTime - startTime);
+            
+            TestLogger.info("✓ DELETE " + endpoint + " : " + response.statusCode() + " (" + (endTime - startTime) + "ms)");
+            return apiResponse;
         } catch (Exception e) {
             TestLogger.error("✗ DELETE request failed: " + endpoint, e);
             throw new RuntimeException("API DELETE request failed: " + endpoint, e);
@@ -141,6 +167,7 @@ public class APITester {
     
     private String buildQueryString(Map<String, String> params) {
         StringBuilder sb = new StringBuilder();
+        // Simple key=value&key=value builder (no URL encoding by design for current test data).
         params.forEach((k, v) -> {
             if (sb.length() > 0) sb.append("&");
             sb.append(k).append("=").append(v);
@@ -154,6 +181,7 @@ public class APITester {
     public static class APIResponse {
         private int statusCode;
         private String body;
+        private long responseTime;
         @SuppressWarnings("unused")
 		private HttpResponse<String> rawResponse;
         
@@ -161,6 +189,7 @@ public class APITester {
             this.rawResponse = response;
             this.statusCode = response.statusCode();
             this.body = response.body();
+            this.responseTime = 0; // Will be set externally if needed
         }
         
         public int getStatusCode() {
@@ -169,6 +198,55 @@ public class APITester {
         
         public String getBody() {
             return body;
+        }
+        
+        public long getResponseTime() {
+            return responseTime;
+        }
+        
+        public void setResponseTime(long responseTime) {
+            this.responseTime = responseTime;
+        }
+        
+        public boolean isSuccess() {
+            return statusCode >= 200 && statusCode < 300;
+        }
+        
+        public boolean isJson() {
+            try {
+                if (body == null || body.trim().isEmpty()) {
+                    return false;
+                }
+                // Valid if Jackson can parse it into any JSON node type (object/array/value).
+                new ObjectMapper().readTree(body);
+                return true;
+            } catch (Exception e) {
+                return false;
+            }
+        }
+        
+        @SuppressWarnings("unchecked")
+        public boolean hasField(String fieldName) {
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                Map<String, Object> json = mapper.readValue(body, Map.class);
+                return json.containsKey(fieldName);
+            } catch (Exception e) {
+                return false;
+            }
+        }
+        
+        @SuppressWarnings("unchecked")
+        public String getFieldValue(String fieldName) {
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                Map<String, Object> json = mapper.readValue(body, Map.class);
+                Object value = json.get(fieldName);
+                // Normalize to String for easy assertion in Cucumber steps.
+                return value != null ? String.valueOf(value) : null;
+            } catch (Exception e) {
+                return null;
+            }
         }
         
         public APIResponse assertStatusCode(int expectedCode) {
