@@ -34,7 +34,7 @@ This is a clean, well-organized test automation framework for OrangeHRM. It uses
 ✅ **Auto Cleanup** - Generated reports and logs cleaned automatically  
 
 **Test Coverage:**
-- 10 smoke tests - Critical functionality checks (runs in ~5 minutes)
+- 21 smoke tests - Critical functionality checks (runs in ~5 minutes)
 - 40+ regression tests - Comprehensive coverage of all features
 
 ## Prerequisites
@@ -88,7 +88,7 @@ orangehrm-playwright-tests/
 │   │       └── TestLogger.java             # Custom logging utility
 │   └── resources/
 │       ├── features/
-│       │   ├── smoke.feature               # 10 critical smoke tests
+│       │   ├── smoke.feature               # 21 critical smoke tests
 │       │   └── regression.feature          # 40+ regression tests
 │       ├── test.properties                 # Test configuration
 │       └── log4j2.xml                      # Logging configuration
@@ -107,7 +107,7 @@ orangehrm-playwright-tests/
 ### Run Test Suites
 
 ```bash
-# Smoke tests - Quick validation (10 tests, ~5 minutes)
+# Smoke tests - Quick validation (21 tests, ~5 minutes)
 mvn "-Dcucumber.filter.tags=@smoke" test
 
 # Regression tests - Full suite (40+ tests, ~30 minutes)
@@ -163,7 +163,7 @@ This repository is integrated with CircleCI for continuous testing. Configuratio
   - Node 0: Tests tagged @test1-@test5
   - Node 1: Tests tagged @test6-@test10
   - Node 2: Tests tagged @test11-@test15
-  - Node 3: Tests tagged @test16-@test20
+  - Node 3: Tests tagged @test16-@test21
 - **Smart Caching** - Caches Maven dependencies to speed up builds
 - **Headless Execution** - Runs browser tests in headless Chromium mode
 - **Fast Feedback** - Full smoke suite completes in ~2 minutes with parallelization

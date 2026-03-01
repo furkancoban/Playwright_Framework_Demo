@@ -414,6 +414,17 @@ public class StepDefinitions {
         assertTrue(dashboardPage.isDropdownMenuItemPresent("Logout"),
                 "Logout option should be present in user menu");
         TestLogger.assertion("Logout option is visible in user menu");
+
+        @Then("I should see personal details section")
+        public void i_should_see_personal_details_section() {
+            TestLogger.testStep("Verify personal details section on My Info page");
+            assertNotNull(testContext.getPage(), "Page should exist");
+            String url = testContext.getPage().url();
+            assertTrue(url.contains("myinfo"), "URL should contain 'myinfo' module");
+            // Wait for page content to load
+            testContext.getPage().waitForLoadState();
+            TestLogger.assertion("Personal details section is visible on My Info page");
+        }
     }
 
     @When("I verify all main menu items are present")

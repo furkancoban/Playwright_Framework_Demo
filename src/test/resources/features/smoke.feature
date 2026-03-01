@@ -212,5 +212,15 @@ Feature: Smoke Test Suite - OrangeHRM Critical Functionality
     Given the API base URL is configured
     When I add API header "Authorization" with value "Bearer test-token"
     And I send a GET request to "/time/timesheets"
+
+      @smoke @test21 @navigation @myinfo
+      Scenario: Test 21 - Navigate to My Info module
+        Given I am on the OrangeHRM login page
+        When I login with valid credentials
+        Then I should see the dashboard
+        When I navigate to "My Info" menu
+        Then the URL should contain "myinfo"
+        And the page should load successfully
+        And I should see personal details section
     Then the API response should be valid JSON
     And the API response time should be less than 5000 milliseconds
