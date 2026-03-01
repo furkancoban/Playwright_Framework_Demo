@@ -9,39 +9,39 @@ public class TestLogger {
     private static final Logger logger = LoggerFactory.getLogger("TestExecution");
 
     public static void info(String message) {
-        logger.info("ℹ️  " + message);
+        logger.info("[INFO] " + message);
     }
 
     public static void info(String message, Object... args) {
-        logger.info("ℹ️  " + message, args);
+        logger.info("[INFO] " + message, args);
     }
 
     public static void debug(String message) {
-        logger.debug("🔍 " + message);
+        logger.debug("[DEBUG] " + message);
     }
 
     public static void debug(String message, Object... args) {
-        logger.debug("🔍 " + message, args);
+        logger.debug("[DEBUG] " + message, args);
     }
 
     public static void warn(String message) {
-        logger.warn("⚠️  " + message);
+        logger.warn("[WARN] " + message);
     }
 
     public static void warn(String message, Throwable throwable) {
-        logger.warn("⚠️  " + message, throwable);
+        logger.warn("[WARN] " + message, throwable);
     }
 
     public static void error(String message) {
-        logger.error("❌ " + message);
+        logger.error("[ERROR] " + message);
     }
 
     public static void error(String message, Throwable throwable) {
-        logger.error("❌ " + message, throwable);
+        logger.error("[ERROR] " + message, throwable);
     }
 
     public static void success(String message) {
-        logger.info("✅ " + message);
+        logger.info("[SUCCESS] " + message);
     }
 
     public static void testStep(String stepName) {

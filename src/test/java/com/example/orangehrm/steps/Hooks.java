@@ -60,8 +60,8 @@ public class Hooks {
             EnhancedReportGenerator.setTestEndTime(java.time.LocalDateTime.now());
             EnhancedReportGenerator.generateEnhancedReport();
             
-            TestLogger.info("\n📊 REPORTS GENERATED:");
-            TestLogger.info("  ✨ Enhanced Report: target/enhanced-test-report.html");
+            TestLogger.info("\n[REPORTS] REPORTS GENERATED:");
+            TestLogger.info("  [DONE] Enhanced Report: target/enhanced-test-report.html");
             TestLogger.info("==============================\n");
         }));
     }
@@ -189,7 +189,7 @@ public class Hooks {
                 );
                 
                 long navigationTime = System.currentTimeMillis() - startTime;
-                TestLogger.info("✓ Page navigation completed in " + navigationTime + "ms");
+                TestLogger.info("[OK] Page navigation completed in " + navigationTime + "ms");
 
                 TestLogger.info("Navigation successful, login page ready for interaction");
                 return;  // Success!
@@ -225,7 +225,7 @@ public class Hooks {
                 byte[] screenshot = page.screenshot();
                 if (screenshot != null && screenshot.length > 0) {
                     scenario.attach(screenshot, "image/png", stepName);
-                    TestLogger.debug("✓ Screenshot captured and embedded (" + screenshot.length + " bytes)");
+                    TestLogger.debug("[OK] Screenshot captured and embedded (" + screenshot.length + " bytes)");
                 } else {
                     TestLogger.warn("Screenshot captured but empty");
                 }

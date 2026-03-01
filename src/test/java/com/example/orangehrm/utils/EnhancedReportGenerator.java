@@ -575,7 +575,7 @@ public class EnhancedReportGenerator {
             
             for (TestStep step : scenario.steps) {
                 String stepStatusClass = step.status != null ? step.status.toLowerCase() : "unknown";
-                String stepIcon = "passed".equals(stepStatusClass) ? "✓" : "failed".equals(stepStatusClass) ? "✗" : "○";
+                String stepIcon = "passed".equals(stepStatusClass) ? "[OK]" : "failed".equals(stepStatusClass) ? "[NO]" : "[~]";
                 String stepDuration = String.format("%.0fms", (double) step.durationMs);
                 
                 details.append("                        <li class=\"step-item\">\n");
@@ -674,10 +674,10 @@ public class EnhancedReportGenerator {
         System.out.println("Manually regenerating enhanced test report...");
         try {
             generateEnhancedReport();
-            System.out.println("✓ Report regenerated successfully!");
+            System.out.println("[OK] Report regenerated successfully!");
             System.out.println("Open target/enhanced-test-report.html to view");
         } catch (Exception e) {
-            System.err.println("✗ Failed to regenerate report: " + e.getMessage());
+            System.err.println("[FAIL] Failed to regenerate report: " + e.getMessage());
             e.printStackTrace();
         }
     }

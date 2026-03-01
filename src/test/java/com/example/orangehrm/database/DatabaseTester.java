@@ -36,9 +36,9 @@ public class DatabaseTester {
     private void connect() {
         try {
             this.connection = DriverManager.getConnection(connectionString, username, password);
-            TestLogger.info("✓ Database connection established");
+            TestLogger.info("[OK] Database connection established");
         } catch (Exception e) {
-            TestLogger.error("✗ Failed to connect to database", e);
+            TestLogger.error("[FAIL] Failed to connect to database", e);
             throw new RuntimeException("Database connection failed", e);
         }
     }

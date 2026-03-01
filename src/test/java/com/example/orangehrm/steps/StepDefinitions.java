@@ -499,7 +499,7 @@ public class StepDefinitions {
         // Strict contract check on HTTP status.
         assertEquals(expectedStatusCode.intValue(), lastApiResponse.getStatusCode(),
                 "Expected status code " + expectedStatusCode + " but got " + lastApiResponse.getStatusCode());
-        TestLogger.assertion("✓ API response status code is " + expectedStatusCode);
+        TestLogger.assertion("[OK] API response status code is " + expectedStatusCode);
     }
     
     @Then("the API response should contain {string}")
@@ -509,7 +509,7 @@ public class StepDefinitions {
         String responseBody = lastApiResponse.getBody();
         assertTrue(responseBody.contains(expectedContent),
                 "Response should contain '" + expectedContent + "' but was: " + responseBody);
-        TestLogger.assertion("✓ API response contains expected content");
+        TestLogger.assertion("[OK] API response contains expected content");
     }
     
     @Then("the API response time should be less than {int} milliseconds")
@@ -519,7 +519,7 @@ public class StepDefinitions {
         long actualResponseTime = lastApiResponse.getResponseTime();
         assertTrue(actualResponseTime < maxResponseTime,
                 "Response time should be less than " + maxResponseTime + "ms but was " + actualResponseTime + "ms");
-        TestLogger.assertion("✓ API response time: " + actualResponseTime + "ms");
+        TestLogger.assertion("[OK] API response time: " + actualResponseTime + "ms");
     }
     
     @Then("the API response should be valid JSON")
@@ -570,7 +570,7 @@ public class StepDefinitions {
         assertNotNull(lastApiResponse, "API response should not be null");
         assertTrue(lastApiResponse.isSuccess(),
                 "API response should be successful (2xx) but was " + lastApiResponse.getStatusCode());
-        TestLogger.assertion("✓ API response is successful");
+        TestLogger.assertion("[OK] API response is successful");
     }
     
     @Then("the API should be accessible")
@@ -582,7 +582,7 @@ public class StepDefinitions {
         assertNotNull(response, "API should respond");
         assertTrue(response.getStatusCode() < 500, 
                 "API should be accessible (status < 500), got: " + response.getStatusCode());
-        TestLogger.assertion("✓ API is accessible");
+        TestLogger.assertion("[OK] API is accessible");
     }
 }
 
