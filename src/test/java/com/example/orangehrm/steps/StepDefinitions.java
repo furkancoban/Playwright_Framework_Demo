@@ -24,6 +24,7 @@ import io.cucumber.java.en.When;
  * The assertions are pretty straightforward - each step just checks that its main
  * action worked. More complex validation lives in the page objects themselves.
  */
+@SuppressWarnings("unused")
 public class StepDefinitions {
 
     private TestContext testContext;
@@ -69,7 +70,6 @@ public class StepDefinitions {
     /**
      * Helper for assertNotNull with a screenshot
      */
-    @SuppressWarnings("unused")
     private void assertNotNullWithScreenshot(Object object, String message, String stepDescription) {
         try {
             assertNotNull(object, message);
